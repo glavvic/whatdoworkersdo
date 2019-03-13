@@ -139,14 +139,22 @@
             <p class='label'>PROBLEM</p>
             <p id="question" class='main'></p>
         </div>
+
+        <div class='problem'>
+            <p class='label'>ANSWER</p>
+            <p id="answer" class='main'></p>
+        </div>
+
         <div class='lights'>
             <div id='green-light' class='light'></div>
             <div id='red-light' class='light'></div>
         </div>
+
         <div class='score-container'>
             <p class='label'>RESULT</p>
             <p id="result" class='main'></p>
         </div>
+
         <div class='score-container'>
             <p class='label'>SCORE</p>
             <p id="score" class='main'></p>
@@ -162,6 +170,7 @@
         // set HTML shortcut variables
         const startButton = document.getElementById('start');
         const questionDiv = document.getElementById('question');
+        const answer = document.getElementById('answer');
         const score = document.getElementById('score');
         const result = document.getElementById('result');
         const red = document.getElementById('red-light');
@@ -171,44 +180,45 @@
         const timerLabel = document.getElementById('timer-label');
 
         // helper functions
-        function setHTML(el, text){
+        function setHTML(el, text) {
           el.innerHTML = text;
         }
 
-        function light(light){
-          window.clearTimeout(reset);
-          red.style.background = "black";
-          green.style.background = "black";
-          if (light === "red") red.style.background = "white";
-          if (light === "green") green.style.background = "white";
-          reset = setTimeout(resetLights, 500);
+        function light(light) {
+            window.clearTimeout(reset);
+            red.style.background = "black";
+            green.style.background = "black";
+            if (light === "red") red.style.background = "white";
+            if (light === "green") green.style.background = "white";
+            reset = setTimeout(resetLights, 500);
         }
 
         let reset;
-        function resetLights(){
-          light("");
-         }
+        function resetLights() {
+            light("");
+        }
 
-        function slide(bool){
-          if(bool){
-            slideDiv.classList.add('slid-up');
-          } else {
-            slideDiv.classList.remove('slid-up');
-            // slideDiv.style.webkitTransform = "translateY(0)";
-          }
+        function slide(bool) {
+            if(bool) {
+                slideDiv.classList.add('slid-up');
+            } else {
+                slideDiv.classList.remove('slid-up');
+                // slideDiv.style.webkitTransform = "translateY(0)";
+            }
         }
 
         // listener functions
         document.addEventListener('keypress', (event) => {
-          const keyName = event.key;
-          const number = parseInt(keyName);
-          if (isNaN(number)) return;
-          ob.enteredAnswer = number;
-          ob.checkAnswer();
+            const keyName = event.key;
+            const number = parseInt(keyName);
+            if (isNaN(number)) return;
+            setHTML(answer, number);
+            ob.enteredAnswer = number;
+            ob.checkAnswer();
         });
 
         startButton.addEventListener('click', (event) => {
-          ob.start();
+            ob.start();
         });
 
         // create Object
@@ -221,82 +231,108 @@
 
         // Object Methods
 
-        ob.start = function(){
-          if (ob.inProgress) return;
-          if (ob.countDown) return;
-          setHTML(timerLabel, "Starting in");
-          slide(false);
-          ob.countDownStart = Date.now();
-          ob.countDown = true;
+        ob.start = function() {
+            if (ob.inProgress) return;
+            if (ob.countDown) return;
+            setHTML(timerLabel, "Starting in");
+            slide(false);
+            ob.countDownStart = Date.now();
+            ob.countDown = true;
         }
 
-        ob.begin = function(){
-          if (ob.inProgress) return;
-          ob.score = 0;
-          setHTML(score, ob.score);
-          ob.countDown = false;
-          ob.startTime = Date.now()
-          ob.inProgress = true;
-          ob.newQuestion();
+        ob.begin = function() {
+            if (ob.inProgress) return;
+            ob.score = 0;
+            setHTML(score, ob.score);
+            setHTML(questionDiv, "?");
+            setHTML(answer, "?");
+            ob.countDown = false;
+            ob.startTime = Date.now()
+            ob.inProgress = true;
+            ob.newQuestion();
         }
 
-        ob.newQuestion = function(){
-          const a = Math.floor(Math.random() * 5);
-          const b = Math.floor(Math.random() * 5);
-          const A = Math.max(a, b);
-          const B = Math.min(a, b);
-          const c = A + B;
-          const string = `${A} + ${B} = ?`;
-          this.correctAnswer = c;
-          setHTML(questionDiv, string);
+
+        ob.newQuestion = function() {
+            do {
+                var a = Math.floor(Math.random() * 10);
+                var b = Math.floor(Math.random() * 10);
+                var A = Math.max(a, b);
+                var B = Math.min(a, b);
+                //
+                // MODIFY ME HERE!
+                //
+                var c = A + B;
+                var string = `${A} + ${B} = ?`;
+                //
+                //
+                //
+                this.correctAnswer = c;
+                this.question = string;
+                console.log("c=" + c);
+            } while ((c < 0) || (c >= 10));
+            setHTML(questionDiv, string);
         }
 
-        ob.checkAnswer = function(){
-          if (!ob.inProgress) return;
-          if (ob.correctAnswer === ob.enteredAnswer){
-            setHTML(result, "Correct!");
-            light("green");
-            ob.scoreChange(100);
-          } else {
-            setHTML(result, "Incorrect!");
-            ob.scoreChange(-50);
-            light("red");
-          }
-          ob.newQuestion();
+        ob.checkAnswer = function() {
+            if (!ob.inProgress) return;
+            if (ob.correctAnswer === ob.enteredAnswer) {
+                setHTML(result, randomRight());
+                light("green");
+                ob.scoreChange(100);
+            } else {
+                setHTML(result, randomWrong());
+                ob.scoreChange(-50);
+                light("red");
+            }
+            ob.newQuestion();
         }
 
-        ob.scoreChange = function(change){
-          ob.score += change;
-          setHTML(score, ob.score);
+        ob.scoreChange = function(change) {
+            ob.score += change;
+            setHTML(score, ob.score);
         }
 
-        ob.end = function(){
-          ob.inProgress = false;
-          setHTML(questionDiv, "");
-          slide(true);
+        ob.end = function() {
+            ob.inProgress = false;
+            setHTML(questionDiv, "");
+            slide(true);
         }
 
         // Timer functions
 
-        function checkTimers(){
-          if (ob.countDown){
-            const diff = 3 - Math.floor((Date.now() - ob.countDownStart) / 1000);
-            if (diff > 0){
-              setHTML(timer, diff);
-            } else {
-              ob.begin();
+        function checkTimers() {
+            if (ob.countDown) {
+                const diff = 3 - Math.floor((Date.now() - ob.countDownStart) / 1000);
+                if (diff > 0) {
+                    setHTML(timer, diff);
+                } else {
+                    ob.begin();
+                }
             }
-          }
-          if (ob.inProgress){
-            const diff = 60 - Math.floor((Date.now() - ob.startTime) / 1000);
-            if (diff > -1){
-              setHTML(timerLabel, "Remaining");
-              setHTML(timer, diff);
-            } else {
-              ob.end();
-            }
+            if (ob.inProgress) {
+                const diff = 60 - Math.floor((Date.now() - ob.startTime) / 1000);
+                if (diff > -1) {
+                    setHTML(timerLabel, "Remaining");
+                    setHTML(timer, diff);
+                } else {
+                    ob.end();
+                }
           }
         }
+
+        function randomWrong() {
+            var emojis = ["💩", "😿", "👎", "🤮", "❌", "🙈", "🔥", "😞", "🙉", "🙊", "💥"]
+            const index = Math.floor(Math.random() * emojis.length);
+            return emojis[index];
+        }
+
+        function randomRight() {
+            var emojis = ["🦄", "🌈", "🎆", "👍", "✨", "🐵", "🤗", "😺", "😹", "🥰", "😻", "😍", "💜", "💜"]
+            const index = Math.floor(Math.random() * emojis.length);
+            return emojis[index];
+        }
+
         setInterval(checkTimers, 100);
     </script>
 
