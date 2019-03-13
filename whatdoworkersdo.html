@@ -278,10 +278,12 @@
                 setHTML(result, randomRight());
                 light("green");
                 ob.scoreChange(100);
+                playRandomRightAudio();
             } else {
                 setHTML(result, randomWrong());
-                ob.scoreChange(-50);
                 light("red");
+                ob.scoreChange(-50);
+                playRandomWrongAudio();
             }
             ob.newQuestion();
         }
@@ -325,10 +327,22 @@
             return emojis[index];
         }
 
+        function playRandomWrongAudio() {
+            var soundFiles = [new Audio('./audio/abort.wav'), new Audio('./audio/doh.wav'), new Audio('./audio/negative.wav'), new Audio('./audio/not.wav'), new Audio('./audio/oh_no.wav'), new Audio('./audio/sorry.wav'), new Audio('./audio/haha.wav'), new Audio('./audio/compute.wav')];
+            const index = Math.floor(Math.random() * soundFiles.length);
+            soundFiles[index].play();
+        }
+
         function randomRight() {
             var emojis = ["🦄", "🌈", "🎆", "👍", "✨", "🐵", "🤗", "😺", "😹", "🥰", "😻", "😍", "💜", "💜"]
             const index = Math.floor(Math.random() * emojis.length);
             return emojis[index];
+        }
+
+        function playRandomRightAudio() {
+            var soundFiles = [new Audio('./audio/claps.wav'), new Audio('./audio/chimes.wav'), new Audio('./audio/notify.wav'), new Audio('./audio/hello.wav'), new Audio('./audio/hiho.wav'), new Audio('./audio/tada.wav')];
+            const index = Math.floor(Math.random() * soundFiles.length);
+            soundFiles[index].play();
         }
 
         setInterval(checkTimers, 100);
